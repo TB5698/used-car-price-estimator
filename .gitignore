@@ -1,0 +1,7 @@
+.venv/
+.env
+__pycache__/
+.ipynb_checkpoints/
+mlruns/
+models/
+.pytest_cache/
