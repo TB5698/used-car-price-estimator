@@ -1,0 +1,16 @@
+# Model, training, and app
+pandas==3.0.6
+numpy==2.5.4
+scikit-learn==1.9.1
+lightgbm==4.7.0
+mlflow==3.17.1
+PyYAML==6.0.3
+
+# Notebook and data download
+matplotlib==3.11.2
+ipykernel==7.4.0
+kaggle==2.2.4
+dvc==3.67.1
+
+# Testing
+pytest==9.1.1
