@@ -1,0 +1,9 @@
+data:
+  raw_path: data/raw/vehicles.csv
+  MIN_PRICE: 500
+  MAX_PRICE: 100000
+  MIN_YEAR: 1990
+  MAX_ODOMETER: 300000
+  MIN_ODOMETER: 100
+  NEW_CAR_YEAR: 2020
+  DROP_TITLE_STATUS: ["parts only", "missing"]
