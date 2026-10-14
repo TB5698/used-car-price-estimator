@@ -7,3 +7,8 @@ data:
   MIN_ODOMETER: 100
   NEW_CAR_YEAR: 2020
   DROP_TITLE_STATUS: ["parts only", "missing"]
+train:
+  SAMPLE_SIZE: 100000
+  TEST_SIZE: 0.2
+  RANDOM_SEED: 42
+  EXPERIMENT_NAME: used-car-price
