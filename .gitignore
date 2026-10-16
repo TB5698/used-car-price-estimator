@@ -12,6 +12,7 @@ data/**/*.parquet
 models/*
 !models/.gitkeep
 mlruns/
+mlflow.db
 
 # Secrets
 .env

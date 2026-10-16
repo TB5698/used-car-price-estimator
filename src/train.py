@@ -4,6 +4,7 @@ import pandas as pd
 import yaml
 import mlflow
 import mlflow.sklearn
+from lightgbm import LGBMRegressor
 from sklearn.compose import TransformedTargetRegressor
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -87,7 +88,11 @@ def run_experiment(run_name, regressor, data, train_cfg, log_target=False,
         mlflow.log_metrics(test_metrics)
         mlflow.log_metric("train_mae", train_metrics["mae"])
 
-        mlflow.sklearn.log_model(model, name="model")
+        # cloudpickle, because skops rejects our custom prepare_features function
+        mlflow.sklearn.log_model(
+            model, name="model",
+            serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE,
+        )
 
     print(f"{run_name}: MAE {test_metrics['mae']:.0f}, "
           f"RMSE {test_metrics['rmse']:.0f}, R2 {test_metrics['r2']:.3f}")
@@ -105,3 +110,38 @@ if __name__ == "__main__":
         "ridge_raw_price", Ridge(alpha=1.0), data, train_cfg,
         log_target=False, params={"alpha": 1.0},
     )
+
+    run_experiment(
+        "ridge_log_price", Ridge(alpha=1.0), data, train_cfg,
+        log_target=True, params={"alpha": 1.0},
+    )
+
+    # does the messy condition column help or hurt?
+    run_experiment(
+        "ridge_log_price_condition", Ridge(alpha=1.0), data, train_cfg,
+        log_target=True, use_condition=True, params={"alpha": 1.0},
+    )
+
+    # group more rare models together (fewer model categories)
+    run_experiment(
+        "ridge_log_price_minfreq100", Ridge(alpha=1.0), data, train_cfg,
+        log_target=True, min_frequency=100, params={"alpha": 1.0},
+    )
+
+    # tree model: can learn non-linear depreciation and feature interactions
+    lgbm_params = {"n_estimators": 500, "learning_rate": 0.05, "num_leaves": 63}
+    run_experiment(
+        "lgbm_log_price",
+        LGBMRegressor(**lgbm_params, random_state=train_cfg["RANDOM_SEED"], verbose=-1),
+        data, train_cfg, log_target=True, use_condition=True, params=lgbm_params,
+    )
+
+    # same features, slower learning with more and bigger trees
+    lgbm_params_2 = {"n_estimators": 1000, "learning_rate": 0.03, "num_leaves": 127}
+    run_experiment(
+        "lgbm_log_price_deeper",
+        LGBMRegressor(**lgbm_params_2, random_state=train_cfg["RANDOM_SEED"], verbose=-1),
+        data, train_cfg, log_target=True, use_condition=True, params=lgbm_params_2,
+    )
+
+
