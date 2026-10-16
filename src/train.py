@@ -53,7 +53,10 @@ def evaluate(y_true, y_pred):
 
 def run_experiment(run_name, regressor, data, train_cfg, log_target=False,
                    use_condition=False, min_frequency=25, params=None):
-    """Fit one pipeline, log params, metrics and the model to MLflow."""
+    """Fit one pipeline, log params, metrics and the model to MLflow.
+
+    Returns the test metrics and the fitted model.
+    """
     X_train, X_test, y_train, y_test = data
 
     # preprocessing and regressor live in one Pipeline
@@ -96,7 +99,7 @@ def run_experiment(run_name, regressor, data, train_cfg, log_target=False,
 
     print(f"{run_name}: MAE {test_metrics['mae']:.0f}, "
           f"RMSE {test_metrics['rmse']:.0f}, R2 {test_metrics['r2']:.3f}")
-    return test_metrics
+    return test_metrics, model
 
 
 if __name__ == "__main__":
