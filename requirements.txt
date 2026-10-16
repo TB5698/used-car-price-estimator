@@ -5,6 +5,8 @@ scikit-learn==1.9.1
 lightgbm==4.7.0
 mlflow==3.17.1
 PyYAML==6.0.3
+openai==3.22.1
+python-dotenv==1.2.4
 
 # Notebook and data download
 matplotlib==3.11.2
