@@ -79,19 +79,22 @@ def test_explain_estimate_returns_trimmed_text_and_sends_the_facts():
 
 def test_missing_api_key_gives_a_clear_error(monkeypatch):
     monkeypatch.setattr(llm, "load_dotenv", lambda: None)
-    monkeypatch.delenv("NEBIUS_API_KEY", raising=False)
-    with pytest.raises(RuntimeError, match="NEBIUS_API_KEY"):
+    monkeypatch.delenv("LLM_API_KEY", raising=False)
+    with pytest.raises(RuntimeError, match="LLM_API_KEY"):
         llm.get_client()
 
 
 def test_missing_model_name_gives_a_clear_error(monkeypatch):
     monkeypatch.setattr(llm, "load_dotenv", lambda: None)
-    monkeypatch.delenv("NEBIUS_MODEL", raising=False)
-    with pytest.raises(RuntimeError, match="NEBIUS_MODEL"):
+    monkeypatch.delenv("LLM_MODEL", raising=False)
+    with pytest.raises(RuntimeError, match="LLM_MODEL"):
         llm.get_model_name()
 
 
-def test_client_uses_the_nebius_url(monkeypatch):
+def test_client_uses_groq_unless_a_base_url_is_set(monkeypatch):
     monkeypatch.setattr(llm, "load_dotenv", lambda: None)
-    monkeypatch.setenv("NEBIUS_API_KEY", "test-key")
-    assert str(llm.get_client().base_url) == llm.BASE_URL
+    monkeypatch.setenv("LLM_API_KEY", "test-key")
+    monkeypatch.delenv("LLM_BASE_URL", raising=False)
+    assert str(llm.get_client().base_url).rstrip("/") == llm.DEFAULT_BASE_URL
+    monkeypatch.setenv("LLM_BASE_URL", "https://example.com/v1")
+    assert str(llm.get_client().base_url).rstrip("/") == "https://example.com/v1"

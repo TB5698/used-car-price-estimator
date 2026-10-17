@@ -124,6 +124,16 @@ def test_unreadable_reply_while_a_car_is_in_progress_asks_again():
     assert reply.text.startswith(NO_DETAILS_REPLY) and "mileage" in reply.text
 
 
+def test_off_topic_message_after_a_finished_estimate_does_not_reprice():
+    chat, client = chat_with({CAR_TEXT: CAR_FIELDS, "what is the capital of France": {}},
+                             GOOD_EXPLANATION)
+    chat.send(CAR_TEXT)
+    reply = chat.send("what is the capital of France")
+    assert reply.kind == "off_topic" and reply.text == OFF_TOPIC_REPLY
+    assert reply.estimate is None and client.explain_calls == 1   # only the first estimate
+    assert chat.fields["model"] == "camry"                        # the car is still remembered
+
+
 def test_out_of_scope_car_is_refused_clearly():
     chat, client = chat_with({"1975 Corvette": dict(year=1975, manufacturer="chevrolet",
                                                     model="corvette", odometer=50000)})
@@ -177,6 +187,7 @@ def test_number_check():
     assert adds_no_new_numbers("A rebuilt title takes off 4,950 dollars.", facts)  # sign dropped
     assert not adds_no_new_numbers("Around 16,900 dollars.", facts)
     assert not adds_no_new_numbers("Around 16.5k dollars.", facts)
+    assert not adds_no_new_numbers("About sixteen thousand five hundred dollars.", facts)
     assert adds_no_new_numbers("Two years newer, so 3 or 4 steps.", facts)  # small numbers are fine
 
 

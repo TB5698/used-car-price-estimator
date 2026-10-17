@@ -59,8 +59,16 @@ def _numbers(text):
     return {float(item.replace(",", "").rstrip(".")) for item in found if item.strip(",")}
 
 
+NUMBER_WORDS = re.compile(r"\b(hundred|thousand|million)\b", re.IGNORECASE)
+
+
 def adds_no_new_numbers(text, facts):
-    """True if every number of 10 or more in the text appears in the facts."""
+    """True if every number of 10 or more in the text appears in the facts.
+
+    Numbers written as words ("twelve thousand") cannot be checked, so they fail too.
+    """
+    if NUMBER_WORDS.search(text):
+        return False
     allowed = _numbers(json.dumps(facts))
     return all(number in allowed for number in _numbers(text) if number >= 10)
 
@@ -110,9 +118,12 @@ class Chat:
             return Reply("error", LLM_DOWN_REPLY)
 
         if not stated:
+            # nothing usable in the message: off topic, unless a car is still being filled in
+            if validate_car(self.fields, self.cfg).status == "ok":
+                return Reply("off_topic", OFF_TOPIC_REPLY)
             if not self.fields:
                 return Reply("off_topic", OFF_TOPIC_REPLY)
-            return self._answer(NO_DETAILS_REPLY)   # a car is in progress: ask again
+            return self._answer(NO_DETAILS_REPLY)
 
         if self._is_different_car(stated):
             self.fields = {}
@@ -145,3 +156,21 @@ class Chat:
         except Exception:
             text = plain_summary(facts)
         return Reply("estimate", text, headline_for(estimate), estimate, facts)
+
+
+def main():
+    """Try the whole pipeline in the terminal: python -m src.app"""
+    chat = Chat.from_env()
+    print("Describe a used car (blank line to quit).")
+    while True:
+        message = input("\nyou> ").strip()
+        if not message:
+            break
+        reply = chat.send(message)
+        if reply.headline:
+            print(f"\n{reply.headline}")
+        print(reply.text)
+
+
+if __name__ == "__main__":
+    main()

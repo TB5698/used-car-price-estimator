@@ -1,10 +1,12 @@
-"""Talk to the LLM through Nebius Token Factory (OpenAI-compatible API).
+"""Talk to the LLM through any OpenAI-compatible API (Groq by default).
 
 The LLM has two small jobs: turn a plain-English message into car fields, and
 turn numbers computed in Python into a short explanation. It never decides
 whether a car can be priced; src/validate.py does that.
 
-To see which models your key can use, run from the repo root:
+Settings come from .env (see .env.example): LLM_API_KEY, LLM_MODEL and, to use a
+provider other than Groq, LLM_BASE_URL. To see which models your key can use, run
+from the repo root:
     python -m src.llm
 """
 import json
@@ -16,7 +18,7 @@ from openai import OpenAI
 
 from src.validate import MODEL_COLUMNS
 
-BASE_URL = "https://api.tokenfactory.nebius.com/v1/"
+DEFAULT_BASE_URL = "https://api.groq.com/openai/v1"
 
 EXTRACT_PROMPT = """You read a message about a used car and fill in a JSON object.
 Use exactly these keys: year, manufacturer, model, odometer, type, drive, fuel, \
@@ -40,30 +42,32 @@ EXPLAIN_PROMPT = """You explain a used car price estimate to a shopper in plain,
 friendly language.
 Use only the facts you are given. Do not add numbers, reasons or advice that are \
 not in them.
-Write numbers in full, like 12,300, never 12.3k, and do not calculate new numbers.
+Write every number as digits with commas, like 12,300 (never in words like \
+"twelve thousand" and never 12.3k), and do not calculate new numbers.
 Write 3 to 5 sentences: the estimated price and range first, then what moves the \
 price, then any caveats."""
 
 
 def get_client():
-    """OpenAI client pointed at Nebius. The key comes from .env or the environment."""
+    """OpenAI client for the provider in .env. The key comes from .env or the environment."""
     load_dotenv()
-    key = os.environ.get("NEBIUS_API_KEY")
+    key = os.environ.get("LLM_API_KEY")
     if not key:
         raise RuntimeError(
-            "NEBIUS_API_KEY is not set. Add it to a .env file in the repo root "
+            "LLM_API_KEY is not set. Add it to a .env file in the repo root "
             "(see .env.example)."
         )
-    return OpenAI(base_url=BASE_URL, api_key=key)
+    base_url = os.environ.get("LLM_BASE_URL") or DEFAULT_BASE_URL
+    return OpenAI(base_url=base_url, api_key=key)
 
 
 def get_model_name():
     """Model id from .env or the environment."""
     load_dotenv()
-    name = os.environ.get("NEBIUS_MODEL")
+    name = os.environ.get("LLM_MODEL")
     if not name:
         raise RuntimeError(
-            "NEBIUS_MODEL is not set. Run `python -m src.llm` to list the models "
+            "LLM_MODEL is not set. Run `python -m src.llm` to list the models "
             "your key can use, then add one to .env (see .env.example)."
         )
     return name
