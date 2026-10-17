@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 from lightgbm import LGBMRegressor
 
+from src.error_stats import save_error_stats
 from src.preprocess import load_config
 from src.train import load_split, load_train_config, run_experiment
 
@@ -47,6 +48,9 @@ def main():
         serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE,
     )
     print(f"Saved model to {MODEL_DIR}")
+
+    # how far off the model is on the held-out cars, used for the price range in the app
+    save_error_stats(model, data[1], data[3])
 
     # reload from disk and check it gives the same answer as the model in memory
     car = pd.DataFrame([{
