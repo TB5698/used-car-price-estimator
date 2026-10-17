@@ -7,6 +7,7 @@ mlflow==3.17.1
 PyYAML==6.0.3
 openai==3.22.1
 python-dotenv==1.2.4
+streamlit==1.66.0
 
 # Notebook and data download
 matplotlib==3.11.2

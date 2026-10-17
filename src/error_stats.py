@@ -13,7 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
-from src.estimate import MODEL_DIR, STATS_PATH, model_key_for, model_keys
+from src.estimate import MODEL_DIR, STATS_PATH, load_model, model_key_for, model_keys
 from src.preprocess import load_config
 
 LEVEL = 0.8   # the range covers the middle 80 percent of test errors
@@ -61,15 +61,13 @@ def save_error_stats(model, X_test, y_test, path=STATS_PATH):
 
 
 def main():
-    import mlflow.sklearn
-
     from src.train import load_split, load_train_config
 
     data_cfg = load_config()
     train_cfg = load_train_config()
     train_cfg["SAMPLE_SIZE"] = None  # same split as train_final
     _, X_test, _, y_test = load_split(data_cfg, train_cfg)
-    model = mlflow.sklearn.load_model(str(MODEL_DIR))
+    model = load_model(MODEL_DIR)
     save_error_stats(model, X_test, y_test)
 
 

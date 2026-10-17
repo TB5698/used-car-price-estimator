@@ -16,3 +16,7 @@ mlflow.db
 
 # Secrets
 .env
+# The trained model and its error stats ship with the repo, so the app and the
+# Docker image run from a fresh clone
+!models/final_model/
+!models/error_stats.json

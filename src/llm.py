@@ -54,8 +54,8 @@ def get_client():
     key = os.environ.get("LLM_API_KEY")
     if not key:
         raise RuntimeError(
-            "LLM_API_KEY is not set. Add it to a .env file in the repo root "
-            "(see .env.example)."
+            "LLM_API_KEY is not set. Put it in a .env file in the repo root "
+            "(see .env.example) or pass it as an environment variable."
         )
     base_url = os.environ.get("LLM_BASE_URL") or DEFAULT_BASE_URL
     return OpenAI(base_url=base_url, api_key=key)
@@ -68,7 +68,8 @@ def get_model_name():
     if not name:
         raise RuntimeError(
             "LLM_MODEL is not set. Run `python -m src.llm` to list the models "
-            "your key can use, then add one to .env (see .env.example)."
+            "your key can use, then set one in .env (see .env.example) or as an "
+            "environment variable."
         )
     return name
 

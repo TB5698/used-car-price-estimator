@@ -1,0 +1,12 @@
+# What the app needs at runtime (the Docker image installs only this file).
+# requirements.txt has the full development set. Keep the versions in sync.
+pandas==3.0.6
+numpy==2.5.4
+scikit-learn==1.9.1
+scipy==1.18.1
+lightgbm==4.7.0
+cloudpickle==3.1.2
+PyYAML==6.0.3
+openai==3.22.1
+python-dotenv==1.2.4
+streamlit==1.66.0

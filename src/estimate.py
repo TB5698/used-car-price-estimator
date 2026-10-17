@@ -18,7 +18,7 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import mlflow.sklearn
+import cloudpickle
 import pandas as pd
 
 from src.preprocess import load_config, prepare_features
@@ -85,6 +85,13 @@ def load_stats(path=STATS_PATH):
         return json.load(f)
 
 
+def load_model(model_dir=MODEL_DIR):
+    """Load the saved model. model.pkl is a plain cloudpickle file, so this needs no
+    MLflow, which keeps the Docker image small."""
+    with open(Path(model_dir) / "model.pkl", "rb") as f:
+        return cloudpickle.load(f)
+
+
 class PriceEstimator:
     def __init__(self, model, stats, cfg, frequent_keys, seen_keys):
         self.model = model
@@ -95,7 +102,7 @@ class PriceEstimator:
 
     @classmethod
     def load(cls, model_dir=MODEL_DIR, stats_path=STATS_PATH, cfg=None):
-        model = mlflow.sklearn.load_model(str(model_dir))
+        model = load_model(model_dir)
         frequent, seen = model_keys(model)
         return cls(model, load_stats(stats_path), cfg or load_config(), frequent, seen)
 

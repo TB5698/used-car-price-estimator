@@ -1,0 +1,15 @@
+{
+  "level": 0.8,
+  "n_test": 72782,
+  "median_abs_pct_error": 0.1252,
+  "common": {
+    "n": 56433,
+    "low_ratio": 0.7846,
+    "high_ratio": 1.3328
+  },
+  "other": {
+    "n": 16349,
+    "low_ratio": 0.6781,
+    "high_ratio": 1.5194
+  }
+}
