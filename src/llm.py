@@ -40,6 +40,7 @@ EXPLAIN_PROMPT = """You explain a used car price estimate to a shopper in plain,
 friendly language.
 Use only the facts you are given. Do not add numbers, reasons or advice that are \
 not in them.
+Write numbers in full, like 12,300, never 12.3k, and do not calculate new numbers.
 Write 3 to 5 sentences: the estimated price and range first, then what moves the \
 price, then any caveats."""
 
