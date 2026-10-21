@@ -22,6 +22,40 @@ def test_complete_car_is_ok():
     assert result.car["condition"] is None
 
 
+def test_roadster_and_cabriolet_count_as_convertible():
+    for word in ("Roadster", "cabriolet", "cabrio"):
+        result = validate_car(car(type=word), CFG)
+        assert result.status == "ok"
+        assert result.car["type"] == "convertible"
+
+
+def test_common_phrasings_map_to_allowed_values():
+    cases = [
+        ("type", "Pickup Truck", "pickup"), ("type", "sport utility", "suv"),
+        ("type", "hatch", "hatchback"), ("type", "saloon", "sedan"),
+        ("type", "mini van", "mini-van"),
+        ("drive", "front-wheel drive", "fwd"), ("drive", "Rear Wheel Drive", "rwd"),
+        ("drive", "four-wheel drive", "4wd"),
+        ("fuel", "EV", "electric"),
+        ("transmission", "stick shift", "manual"),
+        ("transmission", "Automatic Transmission", "automatic"),
+        ("manufacturer", "Alfa Romeo", "alfa-romeo"),
+        ("manufacturer", "Mercedes Benz", "mercedes-benz"),
+        ("manufacturer", "Harley Davidson", "harley-davidson"),
+    ]
+    for field_name, said, expected in cases:
+        result = validate_car(car(**{field_name: said}), CFG)
+        assert result.status == "ok", (field_name, said)
+        assert result.car[field_name] == expected, (field_name, said)
+
+
+def test_all_wheel_drive_in_words_is_4wd_with_warning():
+    result = validate_car(car(drive="all-wheel drive"), CFG)
+    assert result.status == "ok"
+    assert result.car["drive"] == "4wd"
+    assert result.warnings
+
+
 def test_title_status_defaults_to_clean_and_says_so():
     result = validate_car(car(), CFG)
     assert result.car["title_status"] == "clean"
