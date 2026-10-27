@@ -100,6 +100,10 @@ All numbers are on a held-out test set, in dollars. I tracked six runs on a 100,
 | LightGBM, log price, deeper | 3,370 | 5,941 | 0.823 |
 | **Final: same LightGBM settings, all data** | **3,133** | **5,697** | **0.839** |
 
+The six sample runs in the MLflow tracking page, with their metrics and hyperparameters:
+
+![The six experiment runs in MLflow](docs/mlflow_runs.png)
+
 What I took from it:
 
 - Predicting log price beat predicting raw price.
