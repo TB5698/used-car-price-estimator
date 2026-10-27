@@ -10,14 +10,11 @@ import mlflow
 import mlflow.sklearn
 import numpy as np
 import pandas as pd
-from lightgbm import LGBMRegressor
 
 from src.error_stats import save_error_stats
 from src.preprocess import load_config
-from src.train import load_split, load_train_config, run_experiment
+from src.train import load_final_spec, load_split, load_train_config, run_from_spec
 
-# same settings as the best sample run (lgbm_log_price_deeper)
-FINAL_PARAMS = {"n_estimators": 1000, "learning_rate": 0.03, "num_leaves": 127}
 MODEL_DIR = Path("models/final_model")
 
 
@@ -31,13 +28,8 @@ def main():
     # so these numbers should not be ranked against them in compare_runs
     mlflow.set_experiment(train_cfg["EXPERIMENT_NAME"] + "-final")
 
-    regressor = LGBMRegressor(
-        **FINAL_PARAMS, random_state=train_cfg["RANDOM_SEED"], verbose=-1
-    )
-    _, model = run_experiment(
-        "final_lgbm_full_data", regressor, data, train_cfg,
-        log_target=True, use_condition=True, params=FINAL_PARAMS,
-    )
+    # same settings as the best sample run, named in config.yaml (final_model section)
+    _, model = run_from_spec(load_final_spec(), data, train_cfg)
 
     # plain folder for the Docker image (models/ is not tracked by Git)
     if MODEL_DIR.exists():

@@ -12,3 +12,63 @@ train:
   TEST_SIZE: 0.2
   RANDOM_SEED: 42
   EXPERIMENT_NAME: used-car-price
+
+# The experiments that `python -m src.train` runs, in order. Each one is logged to
+# MLflow with these settings. Fields:
+#   name           run name in MLflow
+#   model          ridge or lightgbm
+#   params         hyperparameters passed to the model
+#   log_target     predict log price (the pipeline still returns dollars)
+#   use_condition  include the messy condition column
+#   min_frequency  model names with fewer listings are grouped together
+experiments:
+  - name: ridge_raw_price
+    model: ridge
+    params: {alpha: 1.0}
+    log_target: false
+    use_condition: false
+    min_frequency: 25
+
+  - name: ridge_log_price
+    model: ridge
+    params: {alpha: 1.0}
+    log_target: true
+    use_condition: false
+    min_frequency: 25
+
+  # does the messy condition column help or hurt?
+  - name: ridge_log_price_condition
+    model: ridge
+    params: {alpha: 1.0}
+    log_target: true
+    use_condition: true
+    min_frequency: 25
+
+  # group more rare models together (fewer model categories)
+  - name: ridge_log_price_minfreq100
+    model: ridge
+    params: {alpha: 1.0}
+    log_target: true
+    use_condition: false
+    min_frequency: 100
+
+  # tree model: can learn non-linear depreciation and feature interactions
+  - name: lgbm_log_price
+    model: lightgbm
+    params: {n_estimators: 500, learning_rate: 0.05, num_leaves: 63}
+    log_target: true
+    use_condition: true
+    min_frequency: 25
+
+  # same features, slower learning with more and bigger trees
+  - name: lgbm_log_price_deeper
+    model: lightgbm
+    params: {n_estimators: 1000, learning_rate: 0.03, num_leaves: 127}
+    log_target: true
+    use_condition: true
+    min_frequency: 25
+
+# `python -m src.train_final` trains the settings of one experiment above on all rows.
+final_model:
+  from_experiment: lgbm_log_price_deeper
+  run_name: final_lgbm_full_data

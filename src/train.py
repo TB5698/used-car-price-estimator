@@ -25,6 +25,32 @@ def load_train_config(path="config.yaml"):
         return yaml.safe_load(f)["train"]
 
 
+def load_experiments(path="config.yaml"):
+    """The list of experiments (name, model, params, ...) from config.yaml."""
+    with open(path) as f:
+        return yaml.safe_load(f)["experiments"]
+
+
+def load_final_spec(path="config.yaml"):
+    """The experiment the final model is trained from, plus the final run name."""
+    with open(path) as f:
+        final = yaml.safe_load(f)["final_model"]
+    by_name = {spec["name"]: spec for spec in load_experiments(path)}
+    if final["from_experiment"] not in by_name:
+        raise KeyError(f"final_model.from_experiment {final['from_experiment']!r} "
+                       "is not one of the experiments in config.yaml")
+    return {**by_name[final["from_experiment"]], "name": final["run_name"]}
+
+
+def build_regressor(model_type, params, seed):
+    """Make the regressor named in config.yaml with its hyperparameters."""
+    if model_type == "ridge":
+        return Ridge(**params)
+    if model_type == "lightgbm":
+        return LGBMRegressor(**params, random_state=seed, verbose=-1)
+    raise ValueError(f"unknown model type {model_type!r} (use ridge or lightgbm)")
+
+
 def load_split(data_cfg, train_cfg):
     """Return X_train, X_test, y_train, y_test from the cleaned, sampled data."""
     df = pd.read_csv(data_cfg["raw_path"], usecols=RAW_COLUMNS)
@@ -102,6 +128,18 @@ def run_experiment(run_name, regressor, data, train_cfg, log_target=False,
     return test_metrics, model
 
 
+def run_from_spec(spec, data, train_cfg):
+    """Run one experiment described in config.yaml."""
+    regressor = build_regressor(spec["model"], spec["params"], train_cfg["RANDOM_SEED"])
+    return run_experiment(
+        spec["name"], regressor, data, train_cfg,
+        log_target=spec["log_target"],
+        use_condition=spec["use_condition"],
+        min_frequency=spec["min_frequency"],
+        params=spec["params"],
+    )
+
+
 if __name__ == "__main__":
     data_cfg = load_config()
     train_cfg = load_train_config()
@@ -109,42 +147,5 @@ if __name__ == "__main__":
 
     mlflow.set_experiment(train_cfg["EXPERIMENT_NAME"])
 
-    run_experiment(
-        "ridge_raw_price", Ridge(alpha=1.0), data, train_cfg,
-        log_target=False, params={"alpha": 1.0},
-    )
-
-    run_experiment(
-        "ridge_log_price", Ridge(alpha=1.0), data, train_cfg,
-        log_target=True, params={"alpha": 1.0},
-    )
-
-    # does the messy condition column help or hurt?
-    run_experiment(
-        "ridge_log_price_condition", Ridge(alpha=1.0), data, train_cfg,
-        log_target=True, use_condition=True, params={"alpha": 1.0},
-    )
-
-    # group more rare models together (fewer model categories)
-    run_experiment(
-        "ridge_log_price_minfreq100", Ridge(alpha=1.0), data, train_cfg,
-        log_target=True, min_frequency=100, params={"alpha": 1.0},
-    )
-
-    # tree model: can learn non-linear depreciation and feature interactions
-    lgbm_params = {"n_estimators": 500, "learning_rate": 0.05, "num_leaves": 63}
-    run_experiment(
-        "lgbm_log_price",
-        LGBMRegressor(**lgbm_params, random_state=train_cfg["RANDOM_SEED"], verbose=-1),
-        data, train_cfg, log_target=True, use_condition=True, params=lgbm_params,
-    )
-
-    # same features, slower learning with more and bigger trees
-    lgbm_params_2 = {"n_estimators": 1000, "learning_rate": 0.03, "num_leaves": 127}
-    run_experiment(
-        "lgbm_log_price_deeper",
-        LGBMRegressor(**lgbm_params_2, random_state=train_cfg["RANDOM_SEED"], verbose=-1),
-        data, train_cfg, log_target=True, use_condition=True, params=lgbm_params_2,
-    )
-
-
+    for spec in load_experiments():
+        run_from_spec(spec, data, train_cfg)

@@ -183,12 +183,14 @@ You only need this if you want to retrain. It needs the full dataset.
    mlflow ui --backend-store-uri sqlite:///mlflow.db
    ```
 
+All hyperparameters live in `config.yaml`, not in the code. The `experiments` section lists the six runs (model, settings, and which preprocessing options to use), and `final_model` says which of them to train on all rows. To try a new idea, add an entry there and run `python -m src.train` again.
+
 `train_final` rewrites `models/final_model/` and `models/error_stats.json`. Those files ship with the repo, so commit them again after retraining.
 
 ## Project layout
 
 ```
-config.yaml            cleaning cutoffs and training settings
+config.yaml            cleaning cutoffs, training settings and the experiments
 streamlit_app.py       the chat page
 src/preprocess.py      cleaning rules and the sklearn preprocessing pipeline
 src/train.py           experiments with MLflow tracking
