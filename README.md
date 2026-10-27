@@ -185,3 +185,13 @@ Dockerfile             app image
 - Add a live public link and a GitHub Actions workflow that runs the tests.
 - Test a smaller `min_frequency` for rare models, and try adding state as a feature.
 - Add more body type aliases, such as roadster and cabriolet.
+
+## Reflection
+
+The biggest thing I learned is to let Python make the decisions and let the LLM handle language only. It was tempting to trust the LLM with everything, but a model that guesses a missing mileage or body type gives a confident wrong price. Splitting the jobs also made the app much easier to test, because the tests use a scripted fake LLM and need no API key or network.
+
+The data taught me a lot too. Most of the work was cleaning: zero prices, a listing priced at 3.7 billion dollars, and about 24,000 different spellings of model names. I also learned that a blank field can act like a signal on its own. The same 2016 Camry was priced at 13,119 dollars by one model and 8,239 dollars by another when optional fields were blank, which is why the app asks for the key details instead of guessing.
+
+A few things were harder than I expected. My first virtual environment used a Python version that was too new for the ML packages. MLflow refused to load my model until I changed how it was saved. The Docker image needed my `src` folder just to open the model. And when I told the LLM to write numbers in full, it started spelling them out as words, so I had to change the prompt and the check.
+
+With more time I would add a live public link, run the tests automatically with GitHub Actions, and handle newer cars better, since the data has very few 2020 to 2022 listings.
