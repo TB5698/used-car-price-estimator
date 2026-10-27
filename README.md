@@ -6,6 +6,8 @@ Describe a used car in plain English and get an estimated asking price with a ra
 
 The app answers with a price of about 12,300 dollars, a likely range of about 9,700 to 16,400 dollars, a short explanation, and a "What moves the price" breakdown (more miles, a newer year, a rebuilt title, and so on).
 
+![The chat page pricing a 2016 Toyota Camry](docs/screenshot.png)
+
 I built this as my capstone for the TripleTen AI/ML program. It combines a trained machine learning model with an LLM chat interface, and it covers the rest of the production path too: experiment tracking, tests, a config file, and a Docker image.
 
 ## How it works
