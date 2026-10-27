@@ -30,6 +30,42 @@ The main design rule is that **Python makes the decisions and the LLM only handl
 
 Details gather across turns, so you can answer a follow-up question with just "automatic". If you mention a different make or model, the app starts over with a new car.
 
+## Example conversation
+
+These are the three cases I use to show the app working: a normal question, a question with missing details, and an off-topic question. The LLM's explanation wording changes a little from run to run, so I show the parts Python writes, which stay the same.
+
+**1. A normal question**
+
+```
+you> 2016 Toyota Camry, 90k miles, sedan, front wheel drive, gas, automatic
+
+Estimated asking price: $12,300 (likely range $9,700 to $16,400)
+(A short explanation follows, then the "What moves the price" breakdown.)
+```
+
+The LLM pulls the eight details out of the sentence, Python checks them, the model predicts the price, and the LLM explains numbers that Python already computed.
+
+**2. Missing details**
+
+```
+you> 2016 Camry
+
+To price this car I still need: mileage, fuel (gas, diesel, hybrid, electric, other),
+transmission (automatic, manual, other), drive (fwd, rwd, 4wd), body type (sedan, suv,
+pickup, coupe, hatchback, wagon, van, mini-van, convertible, bus, offroad, other).
+```
+
+The app does not guess. It asks for what is missing, and I can answer with just "automatic" because the details add up across turns.
+
+**3. An off-topic question**
+
+```
+you> what is the capital of France
+
+I estimate the asking price of used cars. Tell me about one, for example:
+"2016 Toyota Camry, 90,000 miles, sedan, front wheel drive, gas, automatic".
+```
+
 ## The data
 
 - Dataset: [Used Cars Dataset (Craigslist listings)](https://www.kaggle.com/datasets/austinreese/craigslist-carstrucks-data) on Kaggle, CC0 license.
